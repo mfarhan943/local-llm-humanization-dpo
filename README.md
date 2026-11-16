@@ -48,7 +48,24 @@ pip install -r requirements.txt
 
 ## Results
 
-See [docs/report.pdf](docs/report.pdf). Even with a small dataset, the DPO model's replies are clearer and more conversational than the base model's.
+The DPO model drops the "As an AI language model…" disclaimer and replies in a friendly, conversational tone.
+
+**Casual chat: a friendlier, more human tone**
+
+![Casual chat comparison](docs/images/casual-chat.png)
+
+| Prompt | Base model | DPO model |
+|---|---|---|
+| *Do you enjoy evening tea?* | "As an artificial intelligence language model, I don't have personal preferences or emotions…" | "I love the way tea can be a quiet companion to a busy day… What's your favorite tea? 😊" |
+| *What color you like most?* | "As an artificial intelligence language model, I don't have a favorite color…" | "I like blue because it's calming, but I also love the vibrant reds of autumn! What's your favorite color? 😊" |
+
+**Support: more sympathetic answers**
+
+![Stress support comparison](docs/images/stress-support.png)
+
+Asked *"How can you help a stressed person?"*, the base model gives a 7-point textbook list. The DPO model answers warmly instead: *"Hey, I get it—stress is like a bad friend who's always there… Take care, and don't forget to take a break—your mental health is worth it."*
+
+This makes the approach a good fit for chatbots, tutoring tools and mental-wellbeing assistants. The full write-up is in [docs/report.pdf](docs/report.pdf).
 
 ## Acknowledgements
 
