@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Model Comparison: Pre vs Post Training</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 70vh; }
+        .column { background: white; border-radius: 12px; display: flex; flex-direction: column; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .col-title { padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; text-align: center; background: #f8f9fa; border-radius: 12px 12px 0 0; }
+        .chat-box { flex-grow: 1; overflow-y: auto; padding: 15px; font-size: 0.9em; }
+        .input-container { max-width: 800px; margin: 20px auto; display: flex; gap: 10px; }
+        input { flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; }
+        button { padding: 12px 24px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        
+        /* Thinking box */
+        details { font-size: 0.8em; color: #777; border-left: 3px solid #ddd; padding-left: 10px; margin-bottom: 10px; }
+        .msg { margin-bottom: 20px; padding: 10px; border-radius: 8px; }
+        .user-msg { background: #e3f2fd; border-left: 4px solid #007bff; }
+        .bot-msg { background: #fdfdfd; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Base vs. DPO-Humanized LLM</h1>
+    </div>
+
+    <div class="comparison-grid">
+        <div class="column">
+            <div class="col-title">Base Model (Qwen3-1.7B)</div>
+            <div id="chat-pre" class="chat-box"></div>
+        </div>
+        <div class="column">
+            <div class="col-title">DPO Humanized Model</div>
+            <div id="chat-post" class="chat-box"></div>
+        </div>
+    </div>
+
+    <div class="input-container">
+        <input type="text" id="user-input" placeholder="Type a prompt to compare models...">
+        <button id="send-btn" onclick="compareModels()">Compare</button>
+    </div>
+
+    <script>
+        const esc = (t) => String(t ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+        async function compareModels() {
+            const input = document.getElementById('user-input');
+            const btn = document.getElementById('send-btn');
+            const val = input.value;
+            if(!val) return;
+
+            // Show user message in both
+            document.getElementById('chat-pre').innerHTML += `<div class="msg user-msg"><b>User:</b> ${esc(val)}</div>`;
+            document.getElementById('chat-post').innerHTML += `<div class="msg user-msg"><b>User:</b> ${esc(val)}</div>`;
+            
+            input.value = '';
+            btn.disabled = true;
+            btn.innerText = "Thinking...";
+
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message: val})
+            });
+            const data = await response.json();
+
+            // Function to format the HTML
+            const formatRes = (obj) => {
+                let html = `<div class="msg bot-msg">`;
+                if(obj.think) html += `<details><summary>Thought Process</summary>${esc(obj.think)}</details>`;
+                html += `<div>${esc(obj.answer)}</div></div>`;
+                return html;
+            };
+
+            document.getElementById('chat-pre').innerHTML += formatRes(data.pre);
+            document.getElementById('chat-post').innerHTML += formatRes(data.post);
+            
+            btn.disabled = false;
+            btn.innerText = "Compare";
+        }
+    </script>
+</body>
+</html>
